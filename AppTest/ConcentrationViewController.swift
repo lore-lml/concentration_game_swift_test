@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ConcentrationViewController: UIViewController {
     // Init a variable once it is needed aka on the first use
     private lazy var game = Concentration(numberOfPairs: numberOfPairs)
     
@@ -21,7 +21,14 @@ class ViewController: UIViewController {
         return cardButtons.count / 2
     }
     
-    private var emojiSet = ["👻", "🎃", "🧙🏻‍♀️", "🦇", "💀", "🧟‍♀️", "🧛🏻‍♂️", "🧞"]
+    var theme: String?{
+        didSet{
+            emojiSet = theme ?? ""
+            emojiDict = [:]
+            updateViewFromModel()
+        }
+    }
+    private var emojiSet = "👻🎃🧙🏻‍♀️🦇💀🧟‍♀️🧛🏻‍♂️🧞"
     
     private var emojiDict = [Card:String]()
     
@@ -44,30 +51,34 @@ class ViewController: UIViewController {
     private func updateFlipCountLabel(){
         let attributes: [NSAttributedString.Key: Any] = [
             .strokeWidth: -5.0,
-            .strokeColor: UIColor.orange
+            .strokeColor: UIColor.black
         ]
         let attributedString = NSAttributedString(string: "Flips: \(flipCount)", attributes: attributes)
         flipCountLabel.attributedText = attributedString
     }
 
     private func updateViewFromModel(){
+        if cardButtons == nil{
+            return
+        }
+        
         for i in cardButtons.indices{
             let button = cardButtons[i]
             let card = self.game.cards[i]
             if !card.isFaceUp{
                 button.setTitle("", for: UIControl.State.normal)
-                button.backgroundColor = card.isMatched ? UIColor.orange.withAlphaComponent(0) : UIColor.orange
+                button.backgroundColor = card.isMatched ? UIColor.blue.withAlphaComponent(0) : UIColor.blue
             }else{
                 button.setTitle(emoji(for: card), for: UIControl.State.normal)
-                button.backgroundColor = card.isMatched ? UIColor.white.withAlphaComponent(0) : UIColor.white
+                button.backgroundColor = card.isMatched ? UIColor.lightGray.withAlphaComponent(0) : UIColor.lightGray
             }
         }
     }
     
     private func emoji(for card: Card) -> String{
         if emojiDict[card] == nil, emojiSet.count > 0{
-            let emojiIndex = emojiSet.count.random_uniform
-            emojiDict[card] = emojiSet.remove(at: emojiIndex)
+            let emojiIndex = emojiSet.index(emojiSet.startIndex, offsetBy: emojiSet.count.random_uniform)
+            emojiDict[card] = String(emojiSet.remove(at: emojiIndex))
         }
         return emojiDict[card] ?? "?"
     }
